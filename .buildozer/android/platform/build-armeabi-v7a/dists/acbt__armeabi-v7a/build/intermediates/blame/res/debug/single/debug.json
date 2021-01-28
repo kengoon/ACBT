@@ -1,0 +1,14 @@
+[
+    {
+        "merged": "/home/kengo/PycharmProjects/ACBT/.buildozer/android/platform/build-armeabi-v7a/dists/acbt__armeabi-v7a/build/intermediates/res/merged/debug/drawable_icon.png.flat",
+        "source": "/home/kengo/PycharmProjects/ACBT/.buildozer/android/platform/build-armeabi-v7a/dists/acbt__armeabi-v7a/src/main/res/drawable/icon.png"
+    },
+    {
+        "merged": "/home/kengo/PycharmProjects/ACBT/.buildozer/android/platform/build-armeabi-v7a/dists/acbt__armeabi-v7a/build/intermediates/res/merged/debug/drawable_presplash.jpg.flat",
+        "source": "/home/kengo/PycharmProjects/ACBT/.buildozer/android/platform/build-armeabi-v7a/dists/acbt__armeabi-v7a/src/main/res/drawable/presplash.jpg"
+    },
+    {
+        "merged": "/home/kengo/PycharmProjects/ACBT/.buildozer/android/platform/build-armeabi-v7a/dists/acbt__armeabi-v7a/build/intermediates/res/merged/debug/layout_main.xml.flat",
+        "source": "/home/kengo/PycharmProjects/ACBT/.buildozer/android/platform/build-armeabi-v7a/dists/acbt__armeabi-v7a/src/main/res/layout/main.xml"
+    }
+]

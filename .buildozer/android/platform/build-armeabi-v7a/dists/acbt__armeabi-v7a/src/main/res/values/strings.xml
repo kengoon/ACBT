@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ACBT</string>
+    <string name="private_version">e1f5338ebe5b750e70baab847e4c61b801f17d87</string>
+    <string name="presplash_color">#FFFFFF</string>
+</resources>

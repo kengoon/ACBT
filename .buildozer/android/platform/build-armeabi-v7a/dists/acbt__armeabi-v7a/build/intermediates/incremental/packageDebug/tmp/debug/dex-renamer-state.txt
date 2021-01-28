@@ -1,0 +1,4 @@
+#Wed Jan 27 15:09:30 WAT 2021
+base.0=/home/kengo/PycharmProjects/ACBT/.buildozer/android/platform/build-armeabi-v7a/dists/acbt__armeabi-v7a/build/intermediates/dex/debug/mergeProjectDexDebug/out/classes.dex
+renamed.0=classes.dex
+path.0=classes.dex

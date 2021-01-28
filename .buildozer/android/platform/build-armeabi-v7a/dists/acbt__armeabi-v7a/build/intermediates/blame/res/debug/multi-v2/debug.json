@@ -1,0 +1,26 @@
+{
+    "logs": [
+        {
+            "outputFile": "/home/kengo/PycharmProjects/ACBT/.buildozer/android/platform/build-armeabi-v7a/dists/acbt__armeabi-v7a/build/intermediates/res/merged/debug/values_values.arsc.flat",
+            "map": [
+                {
+                    "source": "/home/kengo/PycharmProjects/ACBT/.buildozer/android/platform/build-armeabi-v7a/dists/acbt__armeabi-v7a/src/main/res/values/strings.xml",
+                    "from": {
+                        "startLines": "-1,-1,3",
+                        "startColumns": "-1,-1,4",
+                        "startOffsets": "-1,-1,97",
+                        "endColumns": "-1,-1,84",
+                        "endOffsets": "-1,-1,177"
+                    },
+                    "to": {
+                        "startLines": "2,3,4",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,97,149",
+                        "endColumns": "41,51,84",
+                        "endOffsets": "92,144,229"
+                    }
+                }
+            ]
+        }
+    ]
+}
