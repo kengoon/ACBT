@@ -49,7 +49,7 @@ requirements = python3,flask
 presplash.filename = %(source.dir)s/assets/acbt_loader.jpg
 
 # (str) Icon of the application
-#icon.filename = %(source.dir)s/data/icon.png
+icon.filename = %(source.dir)s/assets/logo.jpg
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = portrait
