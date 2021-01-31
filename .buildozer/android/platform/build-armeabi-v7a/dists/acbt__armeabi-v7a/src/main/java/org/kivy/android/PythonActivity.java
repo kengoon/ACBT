@@ -300,12 +300,12 @@ public class PythonActivity extends Activity {
                 } else if (!CheckNetwork.isInternetAvailable((Context) PythonActivity.this) || PythonActivity.this.network != 1) {
                     if (!CheckNetwork.isInternetAvailable((Context) PythonActivity.this) && PythonActivity.this.network == 0) {
                         if (PythonActivity.this.counter != 1) {
-                            mWebView.loadUrl("file:///" + getAppRoot() + "/assets/index.html");
+                            mWebView.loadUrl("file:///" + getAppRoot() + "/assets/error.html");
                             //MainActivity.this.progressBar.setVisibility(0);
                             PythonActivity.this.counter = 1;
                         }
                     } else {
-                        mWebView.loadUrl("file:///" + getAppRoot() + "/assets/index.html");
+                        mWebView.loadUrl("file:///" + getAppRoot() + "/assets/error.html");
                         //MainActivity.this.progressBar.setVisibility(0);
                         //MainActivity.this.progressBar.startAnimation(MainActivity.this.animFadein);
                         System.out.println("hello");
