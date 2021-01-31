@@ -1,6 +1,9 @@
 from flask import Flask, redirect
 from android.runnable import run_on_ui_thread
 from jnius import autoclass
+from android.permissions import Permission, request_permissions
+
+request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
 
 app = Flask(__name__)
 
