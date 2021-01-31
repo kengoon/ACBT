@@ -2,6 +2,7 @@ package org.kivy.android;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.os.Handler;
 import android.os.SystemClock;
 
 import java.io.InputStream;
@@ -41,6 +42,10 @@ import android.webkit.WebView;
 import android.net.Uri;
 
 import org.renpy.android.ResourceManager;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.util.Log;
 
 public class PythonActivity extends Activity {
     // This activity is modified from a mixture of the SDLActivity and
@@ -65,6 +70,8 @@ public class PythonActivity extends Activity {
     private ResourceManager resourceManager = null;
     private Bundle mMetaData = null;
     private PowerManager.WakeLock mWakeLock = null;
+    int network;
+    int counter = 0;
 
     public String getAppRoot() {
         String app_root = getFilesDir().getAbsolutePath() + "/app";
@@ -166,6 +173,7 @@ public class PythonActivity extends Activity {
             mWebView.getSettings().setJavaScriptEnabled(true);
             mWebView.getSettings().setDomStorageEnabled(true);
             mWebView.loadUrl("file:///" + app_root_dir + "/_load.html");
+            delay();
 
             mWebView.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
             mWebView.setWebViewClient(new WebViewClient() {
@@ -182,31 +190,31 @@ public class PythonActivity extends Activity {
                     return false;
                 }
 
-                @Override
-                @TargetApi(android.os.Build.VERSION_CODES.M)
-                public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                    super.onReceivedError(view, request, error);
-                    try {
-                        view.stopLoading();
-                    } catch (Exception ignored){
-
-                    }
-                    if (mWebView.canGoBack()){
-                        mWebView.goBack();
-                        //mWebView.loadUrl("file:///" + getAppRoot() + "/assets/index.html");
-                    }
-                    mWebView.loadUrl("about:blank");
-                    System.out.print(error);
-                    System.out.print(view);
-                    System.out.print(request);
-                    System.out.print("goatsldksldksldkslkdlskd");
-                }
-
-                @Override
-                public void onReceivedError(WebView view, int errorCode, String description, String url) {
-                    view.stopLoading();
-                    mWebView.loadUrl("file:///" + getAppRoot() + "/assets/index.html");
-                }
+//                @Override
+//                @TargetApi(android.os.Build.VERSION_CODES.M)
+//                public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+//                    super.onReceivedError(view, request, error);
+//                    try {
+//                        view.stopLoading();
+//                    } catch (Exception ignored){
+//
+//                    }
+//                    if (mWebView.canGoBack()){
+//                        mWebView.goBack();
+//                        //mWebView.loadUrl("file:///" + getAppRoot() + "/assets/index.html");
+//                    }
+//                    mWebView.loadUrl("about:blank");
+//                    System.out.print(error);
+//                    System.out.print(view);
+//                    System.out.print(request);
+//                    System.out.print("goatsldksldksldkslkdlskd");
+//                }
+//
+//                @Override
+//                public void onReceivedError(WebView view, int errorCode, String description, String url) {
+//                    view.stopLoading();
+//                    mWebView.loadUrl("file:///" + getAppRoot() + "/assets/index.html");
+//                }
             });
             mLayout = new AbsoluteLayout(PythonActivity.mActivity);
             mLayout.addView(mWebView);
@@ -279,6 +287,34 @@ public class PythonActivity extends Activity {
 
         Log.i(TAG, "Opening URL: " + url);
         mActivity.runOnUiThread(new LoadUrl(url));
+    }
+
+    public void delay() {
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                if (CheckNetwork.isInternetAvailable((Context) PythonActivity.this) && PythonActivity.this.network == 0) {
+                    System.out.println("yes we made it");
+                    mWebView.loadUrl("https://acbt.i.ng/verify_access");
+                    mActivity.network = 1;
+                } else if (!CheckNetwork.isInternetAvailable((Context) PythonActivity.this) || PythonActivity.this.network != 1) {
+                    if (!CheckNetwork.isInternetAvailable((Context) PythonActivity.this) && PythonActivity.this.network == 0) {
+                        if (PythonActivity.this.counter != 1) {
+                            mWebView.loadUrl("file:///" + getAppRoot() + "/assets/index.html");
+                            //MainActivity.this.progressBar.setVisibility(0);
+                            PythonActivity.this.counter = 1;
+                        }
+                    } else {
+                        mWebView.loadUrl("file:///" + getAppRoot() + "/assets/index.html");
+                        //MainActivity.this.progressBar.setVisibility(0);
+                        //MainActivity.this.progressBar.startAnimation(MainActivity.this.animFadein);
+                        System.out.println("hello");
+                        mActivity.network = 0;
+                    }
+                }
+                handler.postDelayed(this, 2000);
+            }
+        }, 2000);
     }
 
     public static void enableZoom() {
@@ -594,5 +630,24 @@ class WebViewLoaderMain implements Runnable {
     @Override
     public void run() {
         WebViewLoader.testConnection();
+    }
+}
+
+
+class CheckNetwork {
+    private static final String TAG = "CheckNetwork";
+
+    public static boolean isInternetAvailable(Context paramContext) {
+        NetworkInfo networkInfo = ((ConnectivityManager)paramContext.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+        if (networkInfo == null) {
+            Log.d(TAG, "no internet connection");
+            return false;
+        }
+        if (networkInfo.isConnected()) {
+            Log.d(TAG, " internet connection available...");
+            return true;
+        }
+        Log.d(TAG, " internet connection");
+        return true;
     }
 }
