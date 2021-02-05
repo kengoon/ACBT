@@ -19,7 +19,6 @@
     <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="28" />
 
     <!-- Allow writing to external storage -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     
     
@@ -36,6 +35,10 @@
     
     
     <uses-permission android:name="android.permission.CALL_PHONE" />
+    
+    
+    
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     
     
 

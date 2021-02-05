@@ -1,8 +1,5 @@
 package org.kivy.android;
 
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
-import android.os.Handler;
 import android.os.SystemClock;
 
 import java.io.InputStream;
@@ -21,8 +18,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
-import android.webkit.WebResourceError;
-import android.webkit.WebResourceRequest;
 import android.widget.Toast;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -42,10 +37,6 @@ import android.webkit.WebView;
 import android.net.Uri;
 
 import org.renpy.android.ResourceManager;
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.util.Log;
 
 public class PythonActivity extends Activity {
     // This activity is modified from a mixture of the SDLActivity and
@@ -57,9 +48,7 @@ public class PythonActivity extends Activity {
     public static PythonActivity mActivity = null;
     public static boolean mOpenExternalLinksInBrowser = false;
 
-    /**
-     * If shared libraries (e.g. SDL or the native application) could not be loaded.
-     */
+    /** If shared libraries (e.g. SDL or the native application) could not be loaded. */
     public static boolean mBrokenLibraries;
 
     protected static ViewGroup mLayout;
@@ -70,18 +59,16 @@ public class PythonActivity extends Activity {
     private ResourceManager resourceManager = null;
     private Bundle mMetaData = null;
     private PowerManager.WakeLock mWakeLock = null;
-    int network;
-    int counter = 0;
 
     public String getAppRoot() {
-        String app_root = getFilesDir().getAbsolutePath() + "/app";
+        String app_root =  getFilesDir().getAbsolutePath() + "/app";
         return app_root;
     }
 
     public String getEntryPoint(String search_dir) {
         /* Get the main file (.pyc|.pyo|.py) depending on if we
          * have a compiled version or not.
-         */
+        */
         List<String> entryPoints = new ArrayList<String>();
         entryPoints.add("main.pyo");  // python 2 compiled files
         entryPoints.add("main.pyc");  // python 3 compiled files
@@ -123,7 +110,6 @@ public class PythonActivity extends Activity {
             return null;
         }
 
-        @SuppressLint("InvalidWakeLockTag")
         @Override
         protected void onPostExecute(String result) {
             Log.v("Python", "Device: " + android.os.Build.DEVICE);
@@ -135,35 +121,36 @@ public class PythonActivity extends Activity {
             String errorMsgBrokenLib = "";
             try {
                 loadLibraries();
-            } catch (UnsatisfiedLinkError e) {
+            } catch(UnsatisfiedLinkError e) {
                 System.err.println(e.getMessage());
                 mBrokenLibraries = true;
                 errorMsgBrokenLib = e.getMessage();
-            } catch (Exception e) {
+            } catch(Exception e) {
                 System.err.println(e.getMessage());
                 mBrokenLibraries = true;
                 errorMsgBrokenLib = e.getMessage();
             }
 
-            if (mBrokenLibraries) {
-                AlertDialog.Builder dlgAlert = new AlertDialog.Builder(PythonActivity.mActivity);
+            if (mBrokenLibraries)
+            {
+                AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(PythonActivity.mActivity);
                 dlgAlert.setMessage("An error occurred while trying to load the application libraries. Please try again and/or reinstall."
-                        + System.getProperty("line.separator")
-                        + System.getProperty("line.separator")
-                        + "Error: " + errorMsgBrokenLib);
+                      + System.getProperty("line.separator")
+                      + System.getProperty("line.separator")
+                      + "Error: " + errorMsgBrokenLib);
                 dlgAlert.setTitle("Python Error");
                 dlgAlert.setPositiveButton("Exit",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-                                // if this button is clicked, close current activity
-                                PythonActivity.mActivity.finish();
-                            }
-                        });
-                dlgAlert.setCancelable(false);
-                dlgAlert.create().show();
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog,int id) {
+                            // if this button is clicked, close current activity
+                            PythonActivity.mActivity.finish();
+                        }
+                    });
+               dlgAlert.setCancelable(false);
+               dlgAlert.create().show();
 
-                return;
+               return;
             }
 
             // Set up the webview
@@ -173,49 +160,22 @@ public class PythonActivity extends Activity {
             mWebView.getSettings().setJavaScriptEnabled(true);
             mWebView.getSettings().setDomStorageEnabled(true);
             mWebView.loadUrl("file:///" + app_root_dir + "/_load.html");
-            delay();
 
             mWebView.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
             mWebView.setWebViewClient(new WebViewClient() {
-                @Override
-                public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                    if (mOpenExternalLinksInBrowser) {
-                        if (!(url.startsWith("file:") || url.startsWith("http://127.0.0.1:"))) {
-                            Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                            startActivity(i);
-                            return true;
+                    @Override
+                    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                        if (mOpenExternalLinksInBrowser) {
+                            if (!(url.startsWith("file:") || url.startsWith("http://127.0.0.1:"))) {
+                                Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                                startActivity(i);
+                                return true;
+                            }
                         }
+                        view.loadUrl(url);
+                        return false;
                     }
-                    view.loadUrl(url);
-                    return false;
-                }
-
-//                @Override
-//                @TargetApi(android.os.Build.VERSION_CODES.M)
-//                public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-//                    super.onReceivedError(view, request, error);
-//                    try {
-//                        view.stopLoading();
-//                    } catch (Exception ignored){
-//
-//                    }
-//                    if (mWebView.canGoBack()){
-//                        mWebView.goBack();
-//                        //mWebView.loadUrl("file:///" + getAppRoot() + "/assets/index.html");
-//                    }
-//                    mWebView.loadUrl("about:blank");
-//                    System.out.print(error);
-//                    System.out.print(view);
-//                    System.out.print(request);
-//                    System.out.print("goatsldksldksldkslkdlskd");
-//                }
-//
-//                @Override
-//                public void onReceivedError(WebView view, int errorCode, String description, String url) {
-//                    view.stopLoading();
-//                    mWebView.loadUrl("file:///" + getAppRoot() + "/assets/index.html");
-//                }
-            });
+                });
             mLayout = new AbsoluteLayout(PythonActivity.mActivity);
             mLayout.addView(mWebView);
 
@@ -240,7 +200,7 @@ public class PythonActivity extends Activity {
                         mActivity.getPackageName(), PackageManager.GET_META_DATA).metaData;
 
                 PowerManager pm = (PowerManager) mActivity.getSystemService(Context.POWER_SERVICE);
-                if (mActivity.mMetaData.getInt("wakelock") == 1) {
+                if ( mActivity.mMetaData.getInt("wakelock") == 1 ) {
                     mActivity.mWakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "Screen On");
                     mActivity.mWakeLock.acquire();
                 }
@@ -269,7 +229,7 @@ public class PythonActivity extends Activity {
         String app_root = new String(getAppRoot());
         File app_root_file = new File(app_root);
         PythonUtil.loadLibraries(app_root_file,
-                new File(getApplicationInfo().nativeLibraryDir));
+            new File(getApplicationInfo().nativeLibraryDir));
     }
 
     public static void loadUrl(String url) {
@@ -289,34 +249,6 @@ public class PythonActivity extends Activity {
         mActivity.runOnUiThread(new LoadUrl(url));
     }
 
-    public void delay() {
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            public void run() {
-                if (CheckNetwork.isInternetAvailable((Context) PythonActivity.this) && PythonActivity.this.network == 0) {
-                    System.out.println("yes we made it");
-                    mWebView.loadUrl("https://acbt.i.ng/verify_access");
-                    mActivity.network = 1;
-                } else if (!CheckNetwork.isInternetAvailable((Context) PythonActivity.this) || PythonActivity.this.network != 1) {
-                    if (!CheckNetwork.isInternetAvailable((Context) PythonActivity.this) && PythonActivity.this.network == 0) {
-                        if (PythonActivity.this.counter != 1) {
-                            mWebView.loadUrl("file:///" + getAppRoot() + "/assets/error.html");
-                            //MainActivity.this.progressBar.setVisibility(0);
-                            PythonActivity.this.counter = 1;
-                        }
-                    } else {
-                        mWebView.loadUrl("file:///" + getAppRoot() + "/assets/error.html");
-                        //MainActivity.this.progressBar.setVisibility(0);
-                        //MainActivity.this.progressBar.startAnimation(MainActivity.this.animFadein);
-                        System.out.println("hello");
-                        mActivity.network = 0;
-                    }
-                }
-                handler.postDelayed(this, 2000);
-            }
-        }, 2000);
-    }
-
     public static void enableZoom() {
         mActivity.runOnUiThread(new Runnable() {
             @Override
@@ -328,11 +260,10 @@ public class PythonActivity extends Activity {
     }
 
     public static ViewGroup getLayout() {
-        return mLayout;
+        return   mLayout;
     }
 
     long lastBackClick = SystemClock.elapsedRealtime();
-
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // Check if the key event was the Back button and if there's history
@@ -342,10 +273,10 @@ public class PythonActivity extends Activity {
         }
         // If it wasn't the Back key or there's no web page history, bubble up to the default
         // system behavior (probably exit the activity)
-        if (SystemClock.elapsedRealtime() - lastBackClick > 2000) {
+        if (SystemClock.elapsedRealtime() - lastBackClick > 2000){
             lastBackClick = SystemClock.elapsedRealtime();
             Toast.makeText(this, "Click again to close the app",
-                    Toast.LENGTH_LONG).show();
+            Toast.LENGTH_LONG).show();
             return true;
         }
 
@@ -355,74 +286,70 @@ public class PythonActivity extends Activity {
 
     // loading screen implementation
     public static ImageView mImageView = null;
-
     public void removeLoadingScreen() {
-        runOnUiThread(new Runnable() {
-            public void run() {
-                if (PythonActivity.mImageView != null &&
-                        PythonActivity.mImageView.getParent() != null) {
-                    ((ViewGroup) PythonActivity.mImageView.getParent()).removeView(
-                            PythonActivity.mImageView);
-                    PythonActivity.mImageView = null;
-                }
-            }
-        });
+      runOnUiThread(new Runnable() {
+        public void run() {
+          if (PythonActivity.mImageView != null &&
+                  PythonActivity.mImageView.getParent() != null) {
+            ((ViewGroup)PythonActivity.mImageView.getParent()).removeView(
+            PythonActivity.mImageView);
+            PythonActivity.mImageView = null;
+          }
+        }
+      });
     }
 
     protected void showLoadingScreen() {
-        // load the bitmap
-        // 1. if the image is valid and we don't have layout yet, assign this bitmap
-        // as main view.
-        // 2. if we have a layout, just set it in the layout.
-        // 3. If we have an mImageView already, then do nothing because it will have
-        // already been made the content view or added to the layout.
+      // load the bitmap
+      // 1. if the image is valid and we don't have layout yet, assign this bitmap
+      // as main view.
+      // 2. if we have a layout, just set it in the layout.
+      // 3. If we have an mImageView already, then do nothing because it will have
+      // already been made the content view or added to the layout.
 
-        if (mImageView == null) {
-            int presplashId = this.resourceManager.getIdentifier("presplash", "drawable");
-            InputStream is = this.getResources().openRawResource(presplashId);
-            Bitmap bitmap = null;
-            try {
-                bitmap = BitmapFactory.decodeStream(is);
-            } finally {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                }
-                ;
-            }
-
-            mImageView = new ImageView(this);
-            mImageView.setImageBitmap(bitmap);
-
-            /*
-             * Set the presplash loading screen background color
-             * https://developer.android.com/reference/android/graphics/Color.html
-             * Parse the color string, and return the corresponding color-int.
-             * If the string cannot be parsed, throws an IllegalArgumentException exception.
-             * Supported formats are: #RRGGBB #AARRGGBB or one of the following names:
-             * 'red', 'blue', 'green', 'black', 'white', 'gray', 'cyan', 'magenta', 'yellow',
-             * 'lightgray', 'darkgray', 'grey', 'lightgrey', 'darkgrey', 'aqua', 'fuchsia',
-             * 'lime', 'maroon', 'navy', 'olive', 'purple', 'silver', 'teal'.
-             */
-            String backgroundColor = resourceManager.getString("presplash_color");
-            if (backgroundColor != null) {
-                try {
-                    mImageView.setBackgroundColor(Color.parseColor(backgroundColor));
-                } catch (IllegalArgumentException e) {
-                }
-            }
-            mImageView.setLayoutParams(new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.FILL_PARENT,
-                    ViewGroup.LayoutParams.FILL_PARENT));
-            mImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-
+      if (mImageView == null) {
+        int presplashId = this.resourceManager.getIdentifier("presplash", "drawable");
+        InputStream is = this.getResources().openRawResource(presplashId);
+        Bitmap bitmap = null;
+        try {
+          bitmap = BitmapFactory.decodeStream(is);
+        } finally {
+          try {
+            is.close();
+          } catch (IOException e) {};
         }
 
-        if (mLayout == null) {
-            setContentView(mImageView);
-        } else if (PythonActivity.mImageView.getParent() == null) {
-            mLayout.addView(mImageView);
+        mImageView = new ImageView(this);
+        mImageView.setImageBitmap(bitmap);
+
+        /*
+         * Set the presplash loading screen background color
+         * https://developer.android.com/reference/android/graphics/Color.html
+         * Parse the color string, and return the corresponding color-int.
+         * If the string cannot be parsed, throws an IllegalArgumentException exception.
+         * Supported formats are: #RRGGBB #AARRGGBB or one of the following names:
+         * 'red', 'blue', 'green', 'black', 'white', 'gray', 'cyan', 'magenta', 'yellow',
+         * 'lightgray', 'darkgray', 'grey', 'lightgrey', 'darkgrey', 'aqua', 'fuchsia',
+         * 'lime', 'maroon', 'navy', 'olive', 'purple', 'silver', 'teal'.
+         */
+        String backgroundColor = resourceManager.getString("presplash_color");
+        if (backgroundColor != null) {
+          try {
+            mImageView.setBackgroundColor(Color.parseColor(backgroundColor));
+          } catch (IllegalArgumentException e) {}
         }
+        mImageView.setLayoutParams(new ViewGroup.LayoutParams(
+        ViewGroup.LayoutParams.FILL_PARENT,
+        ViewGroup.LayoutParams.FILL_PARENT));
+        mImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+
+      }
+
+      if (mLayout == null) {
+        setContentView(mImageView);
+      } else if (PythonActivity.mImageView.getParent() == null){
+        mLayout.addView(mImageView);
+      }
     }
 
     //----------------------------------------------------------------------------
@@ -436,25 +363,25 @@ public class PythonActivity extends Activity {
     private List<NewIntentListener> newIntentListeners = null;
 
     public void registerNewIntentListener(NewIntentListener listener) {
-        if (this.newIntentListeners == null)
+        if ( this.newIntentListeners == null )
             this.newIntentListeners = Collections.synchronizedList(new ArrayList<NewIntentListener>());
         this.newIntentListeners.add(listener);
     }
 
     public void unregisterNewIntentListener(NewIntentListener listener) {
-        if (this.newIntentListeners == null)
+        if ( this.newIntentListeners == null )
             return;
         this.newIntentListeners.remove(listener);
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
-        if (this.newIntentListeners == null)
+        if ( this.newIntentListeners == null )
             return;
         this.onResume();
-        synchronized (this.newIntentListeners) {
+        synchronized ( this.newIntentListeners ) {
             Iterator<NewIntentListener> iterator = this.newIntentListeners.iterator();
-            while (iterator.hasNext()) {
+            while ( iterator.hasNext() ) {
                 (iterator.next()).onNewIntent(intent);
             }
         }
@@ -471,25 +398,25 @@ public class PythonActivity extends Activity {
     private List<ActivityResultListener> activityResultListeners = null;
 
     public void registerActivityResultListener(ActivityResultListener listener) {
-        if (this.activityResultListeners == null)
+        if ( this.activityResultListeners == null )
             this.activityResultListeners = Collections.synchronizedList(new ArrayList<ActivityResultListener>());
         this.activityResultListeners.add(listener);
     }
 
     public void unregisterActivityResultListener(ActivityResultListener listener) {
-        if (this.activityResultListeners == null)
+        if ( this.activityResultListeners == null )
             return;
         this.activityResultListeners.remove(listener);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (this.activityResultListeners == null)
+        if ( this.activityResultListeners == null )
             return;
         this.onResume();
-        synchronized (this.activityResultListeners) {
+        synchronized ( this.activityResultListeners ) {
             Iterator<ActivityResultListener> iterator = this.activityResultListeners.iterator();
-            while (iterator.hasNext())
+            while ( iterator.hasNext() )
                 (iterator.next()).onActivityResult(requestCode, resultCode, intent);
         }
     }
@@ -498,9 +425,9 @@ public class PythonActivity extends Activity {
             String serviceTitle,
             String serviceDescription,
             String pythonServiceArgument
-    ) {
+            ) {
         _do_start_service(
-                serviceTitle, serviceDescription, pythonServiceArgument, true
+            serviceTitle, serviceDescription, pythonServiceArgument, true
         );
     }
 
@@ -508,9 +435,9 @@ public class PythonActivity extends Activity {
             String serviceTitle,
             String serviceDescription,
             String pythonServiceArgument
-    ) {
+            ) {
         _do_start_service(
-                serviceTitle, serviceDescription, pythonServiceArgument, false
+            serviceTitle, serviceDescription, pythonServiceArgument, false
         );
     }
 
@@ -519,7 +446,7 @@ public class PythonActivity extends Activity {
             String serviceDescription,
             String pythonServiceArgument,
             boolean showForegroundNotification
-    ) {
+            ) {
         Intent serviceIntent = new Intent(PythonActivity.mActivity, PythonService.class);
         String argument = PythonActivity.mActivity.getFilesDir().getAbsolutePath();
         String app_root_dir = PythonActivity.mActivity.getAppRoot();
@@ -531,7 +458,7 @@ public class PythonActivity extends Activity {
         serviceIntent.putExtra("pythonHome", app_root_dir);
         serviceIntent.putExtra("pythonPath", app_root_dir + ":" + app_root_dir + "/lib");
         serviceIntent.putExtra("serviceStartAsForeground",
-                (showForegroundNotification ? "true" : "false")
+            (showForegroundNotification ? "true" : "false")
         );
         serviceIntent.putExtra("serviceTitle", serviceTitle);
         serviceIntent.putExtra("serviceDescription", serviceDescription);
@@ -546,7 +473,6 @@ public class PythonActivity extends Activity {
 
 
     public static native void nativeSetenv(String name, String value);
-
     public static native int nativeInit(Object arguments);
 
 
@@ -586,13 +512,13 @@ public class PythonActivity extends Activity {
 
         try {
             java.lang.reflect.Method methodCheckPermission =
-                    Activity.class.getMethod("checkSelfPermission", String.class);
+                Activity.class.getMethod("checkSelfPermission", String.class);
             Object resultObj = methodCheckPermission.invoke(this, permission);
             int result = Integer.parseInt(resultObj.toString());
             if (result == PackageManager.PERMISSION_GRANTED)
                 return true;
         } catch (IllegalAccessException | NoSuchMethodException |
-                InvocationTargetException e) {
+                 InvocationTargetException e) {
         }
         return false;
     }
@@ -605,11 +531,11 @@ public class PythonActivity extends Activity {
             return;
         try {
             java.lang.reflect.Method methodRequestPermission =
-                    Activity.class.getMethod("requestPermissions",
-                            String[].class, int.class);
+                Activity.class.getMethod("requestPermissions",
+                String[].class, int.class);
             methodRequestPermission.invoke(this, permissions, requestCode);
         } catch (IllegalAccessException | NoSuchMethodException |
-                InvocationTargetException e) {
+                 InvocationTargetException e) {
         }
     }
 
@@ -630,24 +556,5 @@ class WebViewLoaderMain implements Runnable {
     @Override
     public void run() {
         WebViewLoader.testConnection();
-    }
-}
-
-
-class CheckNetwork {
-    private static final String TAG = "CheckNetwork";
-
-    public static boolean isInternetAvailable(Context paramContext) {
-        NetworkInfo networkInfo = ((ConnectivityManager)paramContext.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
-        if (networkInfo == null) {
-            Log.d(TAG, "no internet connection");
-            return false;
-        }
-        if (networkInfo.isConnected()) {
-            Log.d(TAG, " internet connection available...");
-            return true;
-        }
-        Log.d(TAG, " internet connection");
-        return true;
     }
 }

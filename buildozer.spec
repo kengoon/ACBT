@@ -36,7 +36,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,flask
+requirements = python3,flask,requests,urllib3,chardet,idna,certifi
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -85,7 +85,7 @@ fullscreen = 0
 android.presplash_color = white
 
 # (list) Permissions
-android.permissions = WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,CALL_PRIVILEGED,CALL_PHONE
+android.permissions = WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,CALL_PRIVILEGED,CALL_PHONE,ACCESS_NETWORK_STATE
 
 # (int) Target Android API, should be as high as possible.
 android.api = 28
